@@ -147,9 +147,7 @@ class EmailGenerator:
         - End with a clear call to action
         - Use the sender name: {Config.SENDER_NAME}
         - Use the sender title: {Config.SENDER_TITLE}
-        - Format as a proper email with greeting, body, and signature
-
-        
+        - Format as a proper email with greeting, body, and signature        
 
         {additional_instructions if request.additional_instructions else ""}
         """

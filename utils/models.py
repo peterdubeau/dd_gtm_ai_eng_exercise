@@ -22,17 +22,6 @@ class Speaker(BaseModel):
     email_subject: Optional[str] = Field(None, description="Generated email subject line")
     email_body: Optional[str] = Field(None, description="Generated email body content")
 
-
-class CompanyInfo(BaseModel):
-    """Company information from external APIs."""
-    name: str
-    description: Optional[str] = None
-    industry: Optional[str] = None
-    category: Optional[str] = None
-    website: Optional[str] = None
-    employee_count: Optional[int] = None
-
-
 class EmailGenerationRequest(BaseModel):
     """Request model for email generation."""
     speaker_name: str

@@ -86,18 +86,16 @@ class CompanyClassifier:
             
             return ai_category
             
-            # return local_category
-            
         except Exception as e:
             logger.error(f"Error classifying company {company_name}: {e}")
             return CompanyCategory.OTHER
     async def _ai_classification(self, company_name: str) -> CompanyCategory:
         """Use AI to classify uncertain companies."""
         try:
-            # Step 1: Research the company using web search
+            # Research the company using web search
             company_info = await self._research_company(company_name)
             
-            # Step 2: Classify the company based on research results
+            # Classify the company based on research results
             category = await self._classify_company_with_research(company_name, company_info)
             
             return category

@@ -35,9 +35,8 @@ async def main():
     # Check if OpenAI API key is set
     openai_key = os.getenv("OPENAI_API_KEY")
     if not openai_key:
-        logger.info("⚠️  OPENAI_API_KEY not found - running classification only")
-        logger.info("To test email generation, set: export OPENAI_API_KEY=your_key")
-        logger.info()
+        logger.warning("⚠️  OPENAI_API_KEY not found - running classification only")
+        logger.warning("To test email generation, set: export OPENAI_API_KEY=your_key")
     
     # Process speakers
     logger.info(f"📊 Processing speakers from {input_file}...")
@@ -46,11 +45,11 @@ async def main():
     try:
         await processor.process_speaker_list(input_file, "out/email_list.csv")
         logger.info("\n✅ Emails successfully generated!")
-        logger.info(f"📁 Output saved to: out/email_list.csv")
+        logger.info("📁 Output saved to: out/email_list.csv")
         
         if not openai_key:
-            logger.info("\n📝 Note: Email content was not generated due to missing OpenAI API key")
-            logger.info("The CSV contains speaker data and company classifications only.")
+            logger.warning("📝 Note: Email content was not generated due to missing OpenAI API key")
+            logger.warning("The CSV contains speaker data and company classifications only.")
         
     except Exception as e:
         logger.error(f"❌ Error during processing: {e}")
