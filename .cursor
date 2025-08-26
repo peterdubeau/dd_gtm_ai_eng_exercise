@@ -1,0 +1,13 @@
+{
+  "project": {
+    "name": "DroneDeploy Email Generation System",
+    "description": "AI-powered system for generating personalized outreach emails to conference speakers"
+  },
+  "settings": {
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "black"
+  }
+}
