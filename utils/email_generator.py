@@ -1,4 +1,5 @@
 """Email generation service using OpenAI GPT-4."""
+
 import asyncio
 import logging
 from typing import Optional
@@ -12,84 +13,82 @@ logger = logging.getLogger(__name__)
 
 class EmailGenerator:
     """Service for generating personalized email content using OpenAI."""
-    
+
     def __init__(self):
-        self.client = openai.AsyncOpenAI(api_key=Config.OPENAI_API_KEY) if Config.OPENAI_API_KEY else None
-    
-    async def generate_email(self, request: EmailGenerationRequest) -> EmailGenerationResponse:
+        self.client = (
+            openai.AsyncOpenAI(api_key=Config.OPENAI_API_KEY)
+            if Config.OPENAI_API_KEY
+            else None
+        )
+
+    async def generate_email(
+        self, request: EmailGenerationRequest
+    ) -> EmailGenerationResponse:
         """Generate personalized email content for a speaker."""
         try:
             if not self.client:
                 raise ValueError("OpenAI client not initialized - API key required")
-            
+
             # Generate subject and body concurrently
             subject_task = self._generate_subject(request)
             body_task = self._generate_body(request)
-            
+
             subject, body = await asyncio.gather(subject_task, body_task)
-            
+
             return EmailGenerationResponse(
-                subject=subject,
-                body=body,
-                category=request.company_category
+                subject=subject, body=body, category=request.company_category
             )
-            
+
         except Exception as e:
             logger.error(f"Error generating email for {request.speaker_name}: {e}")
             raise
-    
+
     async def _generate_subject(self, request: EmailGenerationRequest) -> str:
         """Generate an engaging email subject line."""
         prompt = self._create_subject_prompt(request)
 
         try:
-          response = await self.client.chat.completions.create(
-              model="gpt-4",
-              messages=[
-                  {
-                      "role": "system",
-                      "content": "You are an expert at writing engaging email subject lines for B2B outreach. Keep subjects under 60 characters and make them compelling."
-                  },
-                  {
-                      "role": "user",
-                      "content": prompt
-                  }
-              ],
-              max_tokens=50,
-              temperature=0.7
-          )
-          
-          return response.choices[0].message.content.strip().strip('"')
+            response = await self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert at writing engaging email subject lines for B2B outreach. Keep subjects under 60 characters and make them compelling.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=50,
+                temperature=0.7,
+            )
+
+            return response.choices[0].message.content.strip().strip('"')
         except Exception as e:
             logger.error(f"Error generating subject for {request.speaker_name}: {e}")
             return self._generate_fallback_email(request).subject
-    
+
     async def _generate_body(self, request: EmailGenerationRequest) -> str:
         """Generate personalized email body content."""
         prompt = self._create_body_prompt(request)
 
         try:
-          response = await self.client.chat.completions.create(
-              model="gpt-4",
-              messages=[
-                  {
-                      "role": "system",
-                      "content": "You are a professional B2B sales representative for DroneDeploy. Write concise, personalized emails that are relevant to the recipient's role and company type."
-                  },
-                  {
-                      "role": "user",
-                      "content": prompt
-                  }
-              ],
-              max_tokens=300,
-              temperature=0.7
-          )
-          
-          return response.choices[0].message.content.strip()
+            response = await self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a professional B2B sales representative for DroneDeploy. Write concise, personalized emails that are relevant to the recipient's role and company type.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=300,
+                temperature=0.7,
+            )
+
+            return response.choices[0].message.content.strip()
         except Exception as e:
             logger.error(f"Error generating body for {request.speaker_name}: {e}")
             return self._generate_fallback_email(request).body
-    
+
     def _create_subject_prompt(self, request: EmailGenerationRequest) -> str:
         """Create prompt for subject line generation."""
         category_context = self._get_category_context(request.company_category)
@@ -117,7 +116,7 @@ class EmailGenerator:
 
         {additional_instructions if request.additional_instructions else ""}
         """
-    
+
     def _create_body_prompt(self, request: EmailGenerationRequest) -> str:
         """Create prompt for email body generation."""
         category_context = self._get_category_context(request.company_category)
@@ -151,7 +150,7 @@ class EmailGenerator:
 
         {additional_instructions if request.additional_instructions else ""}
         """
-    
+
     def _get_category_context(self, category: CompanyCategory) -> str:
         """Get context information for different company categories."""
         contexts = {
@@ -159,12 +158,14 @@ class EmailGenerator:
             CompanyCategory.OWNER: "This company owns or manages properties/real estate. They get things built for them and would benefit from DroneDeploy's project oversight, progress monitoring, and asset management features.",
             CompanyCategory.PARTNER: "This company could be a potential technology partner or service provider. They might benefit from DroneDeploy's API, integration capabilities, or partnership opportunities.",
             CompanyCategory.COMPETITOR: "This company is in the drone, mapping, or surveying space. They are competitors and should not receive outreach emails.",
-            CompanyCategory.OTHER: "This company doesn't clearly fit into the main categories. Focus on general business benefits of DroneDeploy."
+            CompanyCategory.OTHER: "This company doesn't clearly fit into the main categories. Focus on general business benefits of DroneDeploy.",
         }
-        
+
         return contexts.get(category, contexts[CompanyCategory.OTHER])
-    
-    def _generate_fallback_email(self, request: EmailGenerationRequest) -> EmailGenerationResponse:
+
+    def _generate_fallback_email(
+        self, request: EmailGenerationRequest
+    ) -> EmailGenerationResponse:
         """Generate fallback email content when AI generation fails."""
         if request.company_category == CompanyCategory.COMPETITOR:
             subject = "Conference Connection"
@@ -179,9 +180,7 @@ Best regards,
 {Config.SENDER_NAME}
 {Config.SENDER_TITLE}
 DroneDeploy"""
-        
+
         return EmailGenerationResponse(
-            subject=subject,
-            body=body,
-            category=request.company_category
+            subject=subject, body=body, category=request.company_category
         )
